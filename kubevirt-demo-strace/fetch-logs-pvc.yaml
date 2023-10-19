@@ -1,0 +1,20 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fetch-logs
+spec:
+  securityContext:
+    runAsUser: 107
+    fsGroup: 107
+  volumes:
+    - name: populate
+      persistentVolumeClaim:
+        claimName: debug-tools
+  containers:
+    - name: populate
+      image: busybox:latest
+      command: ["tail", "-f", "/dev/null"]
+      volumeMounts:
+        - mountPath: "/vol"
+          name: populate

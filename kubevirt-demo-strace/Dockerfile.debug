@@ -1,0 +1,14 @@
+FROM quay.io/centos/centos:stream9 as build
+
+ENV DIR /debug-tools
+RUN mkdir -p ${DIR}
+RUN mkdir -p ${DIR}/logs
+
+RUN yum  install --installroot=${DIR} -y \
+	strace \
+    && dnf clean all
+
+COPY ./wrap_qemu_strace.sh $DIR/wrap_qemu_strace.sh
+RUN chmod 0755 ${DIR}/wrap_qemu_strace.sh
+RUN chown 107:107 ${DIR}/wrap_qemu_strace.sh
+RUN chown 107:107 ${DIR}/logs
