@@ -207,6 +207,6 @@ and it possible to copy the file locally with:
 $ kubectl cp fetch-logs:/vol/logs/strace.out strace.out
 ```
 
-You can see a full demo of this setup in the [demo-strace-qemu-kubevirt.mp4](./demo-strace-qemu-kubevirt.mp4).
-
+You can see a full demo of this setup:
+[![asciicast](https://asciinema.org/a/1Cm87DcjtUWprRrWPBzKfxVmp.svg)](https://asciinema.org/a/1Cm87DcjtUWprRrWPBzKfxVmp)
 
