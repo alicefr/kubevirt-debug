@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: populate-pvc
+spec:
+  template:
+    spec:
+      volumes:
+        - name: populate
+          persistentVolumeClaim:
+            claimName: debug-tools
+      containers:
+        - name: populate
+          image: registry:5000/gdb-debug:latest
+          command: ["sh", "-c", "cp -r /debug-tools/* /vol"]
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: "/vol"
+              name: populate
+      restartPolicy: Never
+  backoffLimit: 4

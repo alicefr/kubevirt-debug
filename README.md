@@ -5,4 +5,4 @@ to debug virt tools in the context of KubeVirt.
 
 ## Howto
 * [Install debuging tools in virt-launcher and run QEMU launched by the tool (e.g strace)](kubevirt-demo-strace)
-* [Start QEMU and attach GDB](TODO)
+* [Start QEMU and attach GDB](kubevirt-demo-gdb)

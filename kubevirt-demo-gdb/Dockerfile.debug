@@ -1,0 +1,15 @@
+FROM quay.io/centos/centos:stream9 as build
+
+ENV DIR /debug-tools
+ENV DEBUGINFOD_URLS https://debuginfod.centos.org/
+RUN mkdir -p ${DIR}
+RUN mkdir -p ${DIR}/logs
+
+RUN yum  install --installroot=${DIR} -y \
+	gdb-gdbserver \
+    && dnf clean all
+
+COPY ./wrap_qemu_gdb.sh $DIR/wrap_qemu_gdb.sh
+RUN chmod 0755 ${DIR}/wrap_qemu_gdb.sh
+RUN chown 107:107 ${DIR}/wrap_qemu_gdb.sh
+RUN chown 107:107 ${DIR}/logs

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config-map
+data:
+  my_script.sh: |
+    #!/bin/sh
+    tempFile=`mktemp --dry-run`
+    echo $4 > $tempFile
+    sed -i "s|<emulator>/usr/libexec/qemu-kvm</emulator>|<emulator>/var/run/debug/wrap_qemu_gdb.sh</emulator>|" $tempFile
+    cat $tempFile
+
