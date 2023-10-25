@@ -1,8 +1,0 @@
-FROM quay.io/centos/centos:stream9 as build
-
-ENV DIR /debug-tools
-ENV DEBUGINFOD_URLS https://debuginfod.centos.org/
-
-RUN yum  install  -y \
-	gdb qemu-kvm \
-    && dnf clean all

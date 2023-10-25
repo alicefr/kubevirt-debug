@@ -1,0 +1,10 @@
+ARG registry
+ARG tag
+FROM ${registry}/kubevirt/virt-launcher${tag} AS launcher
+FROM quay.io/centos/centos:stream9 as build
+
+RUN yum  install  -y \
+	gdb \
+    && dnf clean all
+
+COPY --from=launcher /usr/libexec/qemu-kvm /usr/libexec/qemu-kvm
