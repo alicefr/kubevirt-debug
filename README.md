@@ -10,6 +10,6 @@ These HOWTOs are divided into scenarios for privileged (e.g. admins) and regular
     * [Install debuging tools in virt-launcher and run QEMU launched by the tool (e.g strace)](launch-qemu-strace/)
     * [Start QEMU and attach GDB](wrap-gdb)
     * [Logging](logging)
-    * [Execute directly QMP command](qmp-commands)
+    * [Execute virsh and QMP commands](run-virsh)
 * Privileged users
     * [Run privileged pod on the node](privileged-node-pod)
