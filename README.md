@@ -14,5 +14,7 @@ These HOWTOs are divided into scenarios for privileged (e.g. admins) and regular
     * [Logging](logging)
     * [Execute virsh and QMP commands](run-virsh)
     * [Memory dumps](https://kubevirt.io/user-guide/operations/memory_dump/)
+    * [Run guestfs-tools](https://github.com/kubevirt/kubevirt/blob/main/docs/guestfs.md)
+    * [Build KubeVirt with custom rpms](https://github.com/kubevirt/kubevirt/blob/main/docs/custom-rpms.md) or [local custom files](https://github.com/kubevirt/kubevirt/blob/main/docs/local-custom-files.md)
   * Privileged users
     * [Run privileged pod on the node](privileged-node-pod)
