@@ -54,3 +54,28 @@ $ kubectl  logs virt-launcher-vmi-debug-tools-fk64q
 {"component":"virt-launcher","level":"info","msg":"QEMU_MONITOR_RECV_EVENT: mon=0x7faa8801f5d0 event={\"timestamp\": {\"seconds\": 1698324646, \"microseconds\": 707666}, \"event\": \"RTC_CHANGE\", \"data\": {\"offset\": 0, \"qom-path\": \"/machine/unattached/device[8]\"}}","pos":"qemuMonitorJSONIOProcessLine:205","subcomponent":"libvirt","thread":"80","timestamp":"2023-10-26T12:50:46.708000Z"}
 [..]
 ```
+
+The annotation enables the filter from the container creation. However, in
+certain case you might desire to change the logging level dynamically once the container and libvirt have already been started. In this case, [`virt-admin`](https://libvirt.org/manpages/virt-admin.html) come to rescue.
+
+Example:
+```bash
+$ kubectl get po
+NAME                                READY   STATUS    RESTARTS   AGE
+virt-launcher-vmi-ephemeral-nqcld   3/3     Running   0          26m
+$ kubectl  exec -ti virt-launcher-vmi-ephemeral-nqcld -- virt-admin  -c virtqemud:///system  daemon-log-filters  "1:libvirt 1:qemu 1:conf 1:security 3:event 3:json 3:file 3:object 1:util"
+$ kubectl  exec -ti virt-launcher-vmi-ephemeral-nqcld -- virt-admin  -c virtqemud:///system  daemon-log-filters
+ Logging filters: 1:*libvirt* 1:*qemu* 1:*conf* 1:*security* 3:*event* 3:*json* 3:*file* 3:*object* 1:*util* 
+```
+
+Otherwise, if you prefer to redirect the output to a file and fetch it later, you can rely on `kubectl cp` to retrieve the file. In this case, we are saving the file in the `/var/run/libvirt` directory because the compute container has the permissions to write on that path.
+
+Example:
+```bash
+$ kubectl get po
+NAME                                READY   STATUS    RESTARTS   AGE
+virt-launcher-vmi-ephemeral-nqcld   3/3     Running   0          26m
+$ kubectl  exec -ti virt-launcher-vmi-ephemeral-nqcld -- virt-admin  -c virtqemud:///system daemon-log-outputs "1:file:/var/run/libvirt/libvirtd.log"
+$ kubectl cp virt-launcher-vmi-ephemeral-nqcld:/var/run/libvirt/libvirtd.log libvirt-kubevirt.log
+tar: Removing leading `/' from member names
+```
