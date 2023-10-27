@@ -6,7 +6,7 @@ spec:
   containers:
   - command:
     - /bin/sh
-    image: registry:5000/debug:latest
+    image: registry:5000/debug-tools:latest
     imagePullPolicy: Always
     name: debug
     securityContext:

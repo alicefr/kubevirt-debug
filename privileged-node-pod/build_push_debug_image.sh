@@ -2,7 +2,7 @@
 
 K8S_VERSION=k8s-1.27
 CONT=${K8S_VERSION}-dnsmasq
-IMAGE=debug:latest
+IMAGE=debug-tools:latest
 
 PORT=$(sudo podman port $CONT 5000 |awk -F ":" '{print $2}')
 IMAGE_PUSH=localhost:${PORT}/${IMAGE}

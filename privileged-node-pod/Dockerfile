@@ -10,6 +10,7 @@ RUN yum install -y \
 	qemu-kvm-tools \
 	strace \
 	systemtap-client \
+	systemtap-devel \
     && yum clean all
 COPY --from=launcher / /
 #COPY --from=launcher /usr/libexec/qemu-kvm /usr/libexec/qemu-kvm

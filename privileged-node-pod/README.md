@@ -43,7 +43,7 @@ $ echo $tag
 Then, we can build the image by using the `registry` and the `tag` retrieved in the previous steps:
 ```bash
 $ podman build \
-    -t debug \
+    -t debug-tools \
     --build-arg registry=$registry  \
     --build-arg tag=@$tag \
     -f Dockerfile .
@@ -61,7 +61,7 @@ spec:
   containers:
   - command:
     - /bin/sh
-    image: registry:5000/debug:latest
+    image: registry:5000/debug-tools:latest
     imagePullPolicy: Always
     name: debug
     securityContext:
