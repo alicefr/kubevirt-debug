@@ -160,7 +160,7 @@ $ gdb -p 50122 /usr/libexec/qemu-kvm
 
 ### Debugging using `crictl`
 
-[`Crictl`](https://github.com/kubernetes-sigs/cri-tools/blob/master/docs/crictl.md) is a cli for CRI runtimes and can be particularly useful to troubleshoot container failures (for a more detailed guide, please this [Kubernetes article](https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/)).
+[`Crictl`](https://github.com/kubernetes-sigs/cri-tools/blob/master/docs/crictl.md) is a cli for CRI runtimes and can be particularly useful to troubleshoot container failures (for a more detailed guide, please refer to this [Kubernetes article](https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/)).
 
 In this example, we'll concentrate to find the where libvirt creates the files
 and directory in the `compute` container of the virt-launcher pod.
