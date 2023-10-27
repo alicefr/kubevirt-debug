@@ -1,11 +1,12 @@
-# Collection of howtos to debug the virt stack with container and KubeVirt
+# Collection of HOWTOs to debug the virt stack with container and KubeVirt
 
-This repository contains some scripts, yamls and example of debugging techniques
-to debug virt stack in the context of KubeVirt, Kubernetes and containers.
+This repository contains some scripts, yamls and examples of debugging techniques for the virt stack in the context of KubeVirt, Kubernetes and containers.
 
-These HOWTOs are divided into scenarios for privileged (e.g. admins) and regular users. Some of the HOWTOs also point directly to the KubeVirt [user-guide documentation](https://kubevirt.io/user-guide/).
+These HOWTOs are divided into different scenarios for privileged (e.g. admins) and regular users. Some of the links point directly to existing guides, others are part of this repository.
 
-## HOWTOs
+The first source to check is, of course the KubeVirt [user-guide documentation](https://kubevirt.io/user-guide/).
+
+Guides:
 * [KubeVirt debugging guide](https://kubevirt.io/user-guide/operations/debug/)
 * Scenarios
   * Privileged users
