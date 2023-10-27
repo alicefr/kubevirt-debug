@@ -131,7 +131,7 @@ Forwarding from [::1]:1234 -> 1234
 Finally, we can start the gbd client in the container:
 ```bash
 $ podman run -ti --network host gdb-client:latest
-# gdb /usr/libexec/qemu-kvm -ex 'target remote localhost:1234'
+$ gdb /usr/libexec/qemu-kvm -ex 'target remote localhost:1234'
 GNU gdb (GDB) Red Hat Enterprise Linux 10.2-12.el9
 Copyright (C) 2021 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
