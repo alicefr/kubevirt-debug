@@ -5,7 +5,7 @@ This article describes the scenarios in which you can create privileged pods and
 With privileged pods, you may access devices in `/dev`, utilize host namespaces and ptrace processes that are running on the node, and use the `hostPath` volume to mount nodes directly in the container.
 
 
-A quick way to verify if you are allowed to create privileged pods is to create a privileged pod with the `--dry-run=server` option, like:
+A quick way to verify if you are allowed to create privileged pods is to create a sample pod with the `--dry-run=server` option, like:
 
 ```bash
 $ kubectl apply -f debug-pod.ymal --dry-run=server
@@ -13,12 +13,9 @@ $ kubectl apply -f debug-pod.ymal --dry-run=server
 
 # Build the container image
 
-KubeVirt uses [distroless
-containers](https://github.com/GoogleContainerTools/distroless) and it isn't
-possible to use the image as parent original container image and installing additional packages
-because it lacks the package manager.
+KubeVirt uses [distroless containers](https://github.com/GoogleContainerTools/distroless) and those images don't have a package manager, for this reason it isn't possible to use the image as parent for installing additional packages.
 
-In certain debugging scenarios,the tools require to have exactly the same binary available. If the debug tools are operating in a different container, this can be especially difficult as the filesystem of the containers are isolated.
+In certain debugging scenarios, the tools require to have exactly the same binary available. However, if the debug tools are operating in a different container, this can be especially difficult as the filesystem of the containers are isolated.
 
 This section will cover how to build a container image with
 the debug tools plus binaries of the KubeVirt version you want to debug.
@@ -27,8 +24,7 @@ Based on your installation the namespace and the name of the KubeVirt CR could
 vary. In this example, we'll assume that KubeVirt CR is called `kubevirt` and
 installed in the `kubevirt` namespace. You can easily find out how it is called
 in your cluster by searching with `kubectl get kubevirt -A`.
-
-We will need to retrieve the original `virt-launcher image to have exactly the same QEMU binary we want to debug.
+This is necessary as we need to retrieve the original `virt-launcher image to have exactly the same QEMU binary we want to debug.
 
 Get the registry of the images of the KubeVirt installation:
 ```bash
@@ -55,8 +51,7 @@ $ podman build \
 
 ## Deploy the privileged debug pod
 
-This is an example that gives you a couple of hints how you can define your
-debugging pod:
+This is an example that gives you a couple of suggestions how you can define your debugging pod:
 
 ```yaml
 kind: Pod
@@ -104,9 +99,10 @@ spec:
 The `privileged` options is required to have access to mostly all the resources
 on the node.
 
-The `nodeName` ensures that the debugging pod will be schedule on the desired
+The `nodeName` ensures that the debugging pod will be scheduled on the desired
 node. In order to select the right now, you can use the `-owide` option with
 `kubectl get po` and this will report the nodes where the pod is running.
+
 Example:
 ```bash
  k get po -owide
@@ -167,7 +163,7 @@ $ gdb -p 50122 /usr/libexec/qemu-kvm
 [`Crictl`](https://github.com/kubernetes-sigs/cri-tools/blob/master/docs/crictl.md) is a cli for CRI runtimes and can be particularly useful to troubleshoot container failures (for a more detailed guide, please this [Kubernetes article](https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/)).
 
 In this example, we'll concentrate to find the where libvirt creates the files
-and directory in the virt-launcher pod.
+and directory in the `compute` container of the virt-launcher pod.
 
 ```bash
 $ sh-5.1# crictl ps |grep compute
