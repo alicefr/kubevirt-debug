@@ -42,7 +42,7 @@ Then, we can create and populate the `debug-tools` PVC as with did in the [strac
 ```bash
 $ k apply -f debug-tools-pvc.yaml
 persistentvolumeclaim/debug-tools created
-$ kubectl  apply -f populate-job-pvc.yaml 
+$ kubectl  apply -f populate-job-pvc.yaml
 job.batch/populate-pvc created
 $ $ kubectl  get jobs
 NAME           COMPLETIONS   DURATION   AGE
@@ -60,9 +60,9 @@ configmap/my-config-map created
 
 ### Build client image
 
-In this scenario, we use an additional container image containing `gdb and the same qemu binary as the target process to debug. This image will be run locally with `podman`.
+In this scenario, we use an additional container image containing `gdb` and the same qemu binary as the target process to debug. This image will be run locally with `podman`.
 
-In order to build this image, we need to identify the image of the `virt-launcher`container we want to debug. Based on the KubeVirt installation, the namespace and the name of the KubeVirt CR could vary. In this example, we'll assume that KubeVirt CR is called `kubevirt` and installed in the `kubevirt` namespace. 
+In order to build this image, we need to identify the image of the `virt-launcher`container we want to debug. Based on the KubeVirt installation, the namespace and the name of the KubeVirt CR could vary. In this example, we'll assume that KubeVirt CR is called `kubevirt` and installed in the `kubevirt` namespace.
 
 You can easily find out the right names in your cluster by searching with:
 ```bash
@@ -107,7 +107,7 @@ metadata:
 
 Then, we can launch the VM:
 ```bash
-$ kubectl apply -f debug-vmi.yaml 
+$ kubectl apply -f debug-vmi.yaml
 virtualmachineinstance.kubevirt.io/vmi-debug-tools created
 $ kubectl  get vmi
 NAME              AGE   PHASE       IP    NODENAME   READY
