@@ -57,7 +57,6 @@ $ kubectl apply -f configmap.yaml
 configmap/my-config-map created
 ```
 
-
 ### Build client image
 
 In this scenario, we use an additional container image containing `gdb` and the same qemu binary as the target process to debug. This image will be run locally with `podman`.
@@ -87,6 +86,20 @@ $ echo $tag
 "sha256:6c8b85eed8e83a4c70779836b246c057d3e882eb513f3ded0a02e0a4c4bda837"
 ```
 
+Example of Dockerfile:
+```dockerfile
+ARG registry
+ARG tag
+FROM ${registry}/kubevirt/virt-launcher${tag} AS launcher
+FROM quay.io/centos/centos:stream9 as build
+
+RUN yum  install  -y \
+        gdb \
+    && dnf clean all
+
+COPY --from=launcher /usr/libexec/qemu-kvm /usr/libexec/qemu-kvm
+```
+
 3. Build the image by using the `registry` and the `tag` retrieved in the previous steps:
 ```bash
 $ podman build \
@@ -95,6 +108,8 @@ $ podman build \
     --build-arg tag=@$tag \
     -f Dockerfile.client .
 ```
+
+Podman will replace the registry and tag arguments provided on the command line. In this way, we can specify the image registry and shasum for the KubeVirt version to debug.
 
 ## Run the VM to troubleshoot
 
