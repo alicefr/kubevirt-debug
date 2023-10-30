@@ -124,9 +124,34 @@ Execing into the pod gives you a shell with  privileged access to the node plus 
 $ kubectl exec -ti debug -- bash
 ```
 
-The following examples assume you have already execed into the `debug` pod.
+The following examples assume you have already execed into the `node01-debug` pod.
+
+### Validating the host for virtualization
+
+The tool [`vist-host-validate`](https://libvirt.org/manpages/virt-host-validate.html) is utility to validate the host to run libvirt hypervisor. This, for example, can be used to check if a particular node is kvm capable.
+
+Example:
+```bash
+$  virt-host-validate
+  QEMU: Checking for hardware virtualization                                 : PASS
+  QEMU: Checking if device /dev/kvm exists                                   : PASS
+  QEMU: Checking if device /dev/kvm is accessible                            : PASS
+  QEMU: Checking if device /dev/vhost-net exists                             : PASS
+  QEMU: Checking if device /dev/net/tun exists                               : PASS
+  QEMU: Checking for cgroup 'cpu' controller support                         : PASS
+  QEMU: Checking for cgroup 'cpuacct' controller support                     : PASS
+  QEMU: Checking for cgroup 'cpuset' controller support                      : PASS
+  QEMU: Checking for cgroup 'memory' controller support                      : PASS
+  QEMU: Checking for cgroup 'devices' controller support                     : PASS
+  QEMU: Checking for cgroup 'blkio' controller support                       : PASS
+  QEMU: Checking for device assignment IOMMU support                         : PASS
+  QEMU: Checking if IOMMU is enabled by kernel                               : PASS
+  QEMU: Checking for secure guest support                                    : WARN (Unknown if this platform has Secure
+```
 
 ### Run a command directly on the node
+
+The debug container has in the volume section the host filesystem mounted under `/host`. This can be particularly useful if you want to access the node filesystem or execute a command directly on the host. However, the tool needs already to be present on the node.
 
 ```bash
 $ chroot /host
