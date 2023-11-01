@@ -11,7 +11,7 @@ Guides:
 * Scenarios
   * Privileged users
     * [Run privileged pod on the node](privileged-node-pod)
-    * [Build KubeVirt with custom rpms](https://github.com/kubevirt/kubevirt/blob/main/docs/custom-rpms.md) or [local custom files](https://github.com/kubevirt/kubevirt/blob/main/docs/local-custom-files.md)
+    * [Build KubeVirt with custom rpms, file and binaries](build-with-custom-files)
   * Regular users
     * [Logging](logging)
     * [Execute virsh and QMP commands](run-virsh)
