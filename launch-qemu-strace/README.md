@@ -1,12 +1,12 @@
 # Launch QEMU with strace
 
-This guide illustrates how launch QEMU with a debugging tool in virt-launcher pod. This method can be useful to debug early failures or starting QEMU as a child of the debug tool relying on [ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html). The second point is particularly relevant when a process is operating in a non-privileged environment since otherwise, it would need root access to be able to ptrace the process.
+This guide explains how launch QEMU with a debugging tool in virt-launcher pod. This method can be useful to debug early failures or starting QEMU as a child of the debug tool relying on [ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html). The second point is particularly relevant when a process is operating in a non-privileged environment since otherwise, it would need root access to be able to ptrace the process.
 
-[Ephemeral containers](https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/) are among the emerging techniques to overcome the lack of debugging tool inside the original image. This solution does, however, come with a number of limitations.  For example, it is possible to span a new container inside the same pod of the application to debug and share the same PID namespace. Though they share the same PID namespace, KubeVirt's usage of unprivileged containers makes it, for example, impossible to attach strace to a running container. Therefore, this technique isn't appropriate for our needs.
+[Ephemeral containers](https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/) are among the emerging techniques to overcome the lack of debugging tool inside the original image. This solution does, however, come with a number of limitations.  For example, it is possible to span a new container inside the same pod of the application to debug and share the same PID namespace. Though they share the same PID namespace, KubeVirt's usage of unprivileged containers makes it, for example, impossible to ptrace a running container. Therefore, this technique isn't appropriate for our needs.
 
 Due to its security and image size reduction, KubeVirt container images are based on [distroless containers](https://github.com/GoogleContainerTools/distroless). These kinds of images are extremely beneficial for deployments, but they are challenging to troubleshoot because there is no package management, which prevents the installation of additional tools on the flight.
 
-Wrapping the QEMU binary in a script is one practical method for debugging QEMU launched by Libvirt. This script launches the QEMU as a child of this process together with the debug tool (such as [strace](https://man7.org/linux/man-pages/man1/strace.1.html) or [valgrind](https://valgrind.org/)).
+Wrapping the QEMU binary in a script is one practical method for debugging QEMU launched by Libvirt. This script launches the QEMU as a child of this process together with the debugging` tool (such as [strace](https://man7.org/linux/man-pages/man1/strace.1.html) or [valgrind](https://valgrind.org/)).
 
 Example of wrapping script with valgrind:
 ```bash
