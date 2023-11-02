@@ -1,86 +1,20 @@
 # Build KubeVirt with custom rpms, files and binaries
 
-The KubeVirt building system relies on [baze](https://bazel.build/) to compile and assemble the container filesystem. As a developer, you might face situations where you need to build KubeVirt with a custom rpms or binary.
-In order to have the custom file, you need to configure the kubevirt bazel WORKSPACE file or the BUILD.bazel file of the image containing the file.
+The KubeVirt building system relies on [bazel](https://bazel.build/) to compile and assemble the container filesystems. Bazel, differently from podman or docker, doesn't build the container images by running commands inside a container and by committing the resulting filesystem changes, but instead it assembles the container image by directly combining the files.
+
+As a developer, you might face situations where you need to build KubeVirt with a custom rpms or binary. In order to uses custom files, you need to configure the kubevirt bazel WORKSPACE file or the BUILD.bazel file of the image needing the file.
 
 This guide reports some handy examples how to install custom rpms, binaries and files.
 
-## Build custom libvirt rpms from source code
-
-This setup illustrates how to build and integrate custom libvirt rpms in KubeVirt.
-
-### Build libvirt and the rpms
-
-If you already have the rpms available you can skip this section.
-
-  * Create a volume for the rpms that will be shared with the http server container
-```bash
-$ docker volume create rpms
-```
-  * Start build environment for libvirt source code. This setup uses the [container images](https://gitlab.com/libvirt/libvirt/container_registry) used by the libvirt CI. This setup is just an example for reference, and this can be achieved in many ways.
-Start container inside the libvirt directory with your changes and enter in the build container
-```bash
-$ docker run -td -w /libvirt-src --security-opt label=disable --name libvirt-build -v $(pwd):/libvirt-src -v rpms:/root/rpmbuild/RPMS registry.gitlab.com/libvirt/libvirt/ci-centos-stream-8
-# Exec in the container
-$ docker exec -ti libvirt-build bash
-```
-  * Steps inside the build environment to obtain the rpms. More details at https://libvirt.org/compiling.html
-```bash
-# Make sure we get all the latest packages
-$ dnf update -y
-# Compile and create the rpms
-$ meson build
-$ ninja -C build dist
-```
-The build environment might require additional dependencies and this may vary based on the libvirt version:
-```bash
-$ dnf install -y createrepo hostname
-$ rpmbuild -ta    /libvirt-src/build/meson-dist/libvirt-*.tar.xz
-# Create repomd.xml
-$ createrepo -v  /root/rpmbuild/RPMS/x86_64
-```
-
-### Start the http server for the rpms
-
-If you want to use other publicly available rpms or a private repository that is reachable from the KubeVirt build container, you can skip this section and substitute the custom repository.
-The http server container allows to expose locally the rpms to the KubeVirt build server. It is reachable by the IP address from the KubeVirt build container.
-  * Start the http server with the `rpms` volume where we created the rpms in the previous step (otherwise pass the directory that contains the rpms)
-```bash
-$ docker run -dit --name rpms-http-server -p 80 -v rpms:/usr/local/apache2/htdocs/ httpd:latest
-```
-  * Get the IP of the container `rpms-http-server`
-```bash
-$ docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' rpms-http-server
-172.17.0.4
-```
-### Add the custom repository to KubeVirt
-
-  * Create `custom-repo.yaml` pointing to the local http server:
-```yaml
-repositories:
-- arch: x86_64
-  baseurl: http://172.17.0.4:80/x86_64/ # The IP corresponding to the rpms-http-server container
-  name: custom-build
-  gpgcheck: 0
-  repo_gpgcheck: 0
-```
-  * Update the rpms in KubeVirt repository.
-  * If you only want to update a single architecture, set `SINGLE_ARCH="x86_64"`.
-  * It is sometimes necessary to change `basesystem` when using custom rpms packages. This can be achieved by setting `BASESYSTEM=xyz` env variable.
-  * If you want to change version of some packages you can set env variables. See [`hack/rpm-deps.sh`](/hack/rpm-deps.sh) script for all variables that can be changed.
-```bash
-$ make CUSTOM_REPO=custom-repo.yaml LIBVIRT_VERSION=0:7.2.0-1.el8 rpm-deps
-```
-Afterwards, the `WORKSPACE` and `rpm/BUILD.bazel` are automatically updated and KubeVirt can be built with the custom rpms.
-
-
 ## Build KubeVirt using local tarballs
 
-KubeVirt system strongly relies on bazel and it is built mostly by files hosted remotely. It is handy to be able to build KubeVirt using custom local files when you want to replace a file with your local copy. For example for replacing an rpm or, as illustrated below, the libguestfs-appliance, or a binary.
-
-The guide [custom-rpms section](#build-custom-libvirt-rpms-from-source-code) already explains how to build KubeVirt using custom rpms. Here, we specifically focus in using local files, but the 2 methods can be combined based on your needs. The custom-rpms method might fit better for the cases where you also want to resolve the package dependencies automatically.
+By default all the files used by KubeVirt building system are hosted remotely. However, in certain cases, it is handy to be able to build KubeVirt using files locally. For example, when you want to replace a file with your local copy. For example for replacing an rpm, a file, or a binary.
 
 In the following example, we illustrate how to replace the `libguestfs-appliance` file, but it is valid for any cases using remote tarballs.
+
+The KubeVirt building setup is entirely containerized and the script `hack/dockerized` allows you to execute commands inside the build container and at every execute synchronize the local content with the container.
+
+Here, the steps how to build KubeVirt using the custom local appliance.
 
 1. Copy your custom appliance file in the building container. It is enough to have the directory or the file in the kubevirt directory, and it will be automatically synchronized by the `hack/dockerized` command
 
@@ -122,6 +56,81 @@ index fa717cdcd..a27b05d29 100644
 ```
 4. Build the image with your custom appliance `make bazel-build-images`
 
+## Build custom libvirt rpms from source code
+
+This setup illustrates how to build and integrate custom libvirt rpms in KubeVirt.
+
+### Build libvirt and the rpms
+
+If you already have the rpms available you can skip this section.
+
+  * Create a volume for the rpms that will be shared with the http server container
+```bash
+$ podman volume create rpms
+```
+  * Start build environment for libvirt source code. This setup uses the [container images](https://gitlab.com/libvirt/libvirt/container_registry) used by the libvirt CI. This setup is just an example for reference, and this can be achieved in many ways.
+Start container inside the libvirt directory with your changes and enter in the build container
+```bash
+$ podman run -td -w /libvirt-src --security-opt label=disable \
+	--name libvirt-build \
+	-v $(pwd):/libvirt-src \
+	-v rpms:/root/rpmbuild/RPMS \
+	registry.gitlab.com/libvirt/libvirt/ci-centos-stream-9
+$ podman exec -ti libvirt-build bash
+```
+  * Steps inside the build environment to obtain the rpms. More details at https://libvirt.org/compiling.html
+```bash
+# Make sure we get all the latest packages
+$ dnf update -y
+# Compile and create the rpms
+$ meson setup build -Dsystem=true -Dglusterfs="disabled" -Dstorage_gluster="disabled"
+$ ninja -C build dist
+```
+The build environment might require additional dependencies and this may vary based on the libvirt version:
+```bash
+$ dnf install -y createrepo hostname
+$ rpmbuild --nodeps -ta /libvirt-src/build/meson-dist/libvirt-*.tar.xz
+# Create repomd.xml
+$ createrepo -v  /root/rpmbuild/RPMS/x86_64
+```
+
+## Configure a custom RPM repository
+
+### Start the http server for the rpms
+
+This section explains how to expose an local rpm repository to KubeVirt building system. If you want to use other publicly available rpms or a private repository that is reachable from the KubeVirt build container, you can skip this section and directly [substitute the custom repository](#add-the-custom-rpm-repository).
+
+The http server container allows to expose locally the rpms to the KubeVirt build server. It is reachable by the IP address from the KubeVirt build container.
+  * Start the http server with the `rpms` volume where we created the rpms in the previous step (otherwise pass the directory that contains the rpms)
+```bash
+$ docker run -dit --name rpms-http-server -p 80 -v rpms:/usr/local/apache2/htdocs/ httpd:latest
+```
+  * Get the IP of the container `rpms-http-server`
+```bash
+$ docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' rpms-http-server
+172.17.0.4
+```
+
+### Add the custom RPM repository
+
+  * Create `custom-repo.yaml` pointing to the local http server:
+```yaml
+repositories:
+- arch: x86_64
+  baseurl: http://172.17.0.4:80/x86_64/ # The IP corresponding to the rpms-http-server container
+  name: custom-build
+  gpgcheck: 0
+  repo_gpgcheck: 0
+```
+  * Update the rpms in KubeVirt repository.
+  * If you only want to update a single architecture, set `SINGLE_ARCH="x86_64"`.
+  * It is sometimes necessary to change `basesystem` when using custom rpms packages. This can be achieved by setting `BASESYSTEM=xyz` env variable.
+  * If you want to change version of some packages you can set env variables. See [`hack/rpm-deps.sh`](/hack/rpm-deps.sh) script for all variables that can be changed.
+```bash
+$ make CUSTOM_REPO=custom-repo.yaml LIBVIRT_VERSION=0:7.2.0-1.el8 rpm-deps
+```
+Afterwards, the `WORKSPACE` and `rpm/BUILD.bazel` are automatically updated and KubeVirt can be built with the custom rpms.
+
 
 ## Build KubeVirt with QEMU from source code
 
@@ -154,11 +163,7 @@ $ podman build -t qemu_build:centos-stream9 -f Dockerfile.centos-stream-9 .
 
 Once the build environment is ready, we can use it as base for configuring and building QEMU from source.
 ```bash
-$ podman run -ti -e QEMU_SRC=/src \
-    -e BUILD_DIR=/src/build \
-    -e QEMU_SRC=/src \
-    -e INSTALL_DIR=/src/install \
-    -e TARGET_LIST=x86_64-softmmu \
+$ podman run -ti \
     -v $(pwd):/src:Z \
     -w /src  \
     --security-opt label=disable \
