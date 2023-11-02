@@ -117,6 +117,7 @@ RUN dnf distro-sync -y && \
         zstd \
 	libslirp-devel \
 	liburing-devel \
+	libbpf-devel \
 	libblkio-devel && \
     dnf autoremove -y && \
     dnf clean all -y && \
