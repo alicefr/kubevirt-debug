@@ -129,15 +129,31 @@ In certain cases, developers might want to change custom QEMU builds with KubeVi
 
 This guide covers how to build QEMU in a centos stream 9 container and how to use the compiled binaries with the KubeVirt building system.
 
-## Generate centos stream build environment
+### Generate centos-stream build environment
 
 This example assumes you already fetch QEMU source code in the `qemu` directory.
+
+At the moment of writing QEMU didn't support the centos-straem 9 in its CI, but the [`lcitool`](https://github.com/libvirt/libvirt-ci) from libvirt can helps us generating the base Dockerfile for compiling QEMU.
+
 ```bash
 $ cd qemu
 $ git submodule update --init tests/lcitool/libvirt-ci
 $ ./tests/lcitool/libvirt-ci/bin/lcitool --data-dir ./tests/lcitool \
     dockerfile centos-stream-9 qemu > Dockerfile.centos-stream9
+```
+
+The script `configure-qemu-centos-stream9.sh` helps you to configure the QEMU build to be compatible with the centos stream container image used by KubeVirt. However, you can always tune this script with the options needed by your case.
+
+For building QEMU, we are going to start the build environment container with the QEMU source copy. Hence, we can copy the script `configure-qemu-centos-stream9.sh` into the `qemu` directory to be available during the compilation.
+
+For this example, there were 3 packages missing in the generated Dockerfile, and you can create a build environment for this example by using the dockerfile `Dockerfile.centos-stream-9` from this repository.
+
+```bash
 $ podman build -t qemu_build:centos-stream9 -f Dockerfile.centos-stream-9 .
+```
+
+Once the build environment is ready, we can use it as base for configuring and building QEMU from source.
+```bash
 $ podman run -ti -e QEMU_SRC=/src \
     -e BUILD_DIR=/src/build \
     -e QEMU_SRC=/src \
@@ -150,25 +166,24 @@ $ podman run -ti -e QEMU_SRC=/src \
 # Inside the container
 $ mkdir -p /src/build
 $ cd /src/build
-# Flag from scripts/ci/org.centos/stream/8/x86_64/configure
-$ ../configure --target-list=x86_64-softmmu \
+$ ../configure-qemu-centos-stream9.sh
 $ make
 ```
 
-## Build KubeVirt with the compiled QEMU binaries
+### Build KubeVirt with the compiled QEMU binaries
 
 This section combines binaries built in the previous step with the custom local file method explained in the [previous section](#build-kubeVirt-using-local-tarballs).
 
-Calculate shasum of the qemu binary:
+Firstly, we neeed to calculate shasum of the qemu binary:
 ```bash
 $ sha256sum build/qemu-system-x86_64
 463f6f11480d5d2453f84f3727a8a3f939171b4e6c6942acaed4def39b23890d  build/qemu-system-x86_64
 
 ```
 
-Copy the binary inside the kubevirt source directory. In this way, it will automatically copy the binaries inside the build container.
+We can copy the binary inside the kubevirt source directory. In this way, it will automatically copy the binaries inside the build container. In this example, it will be located into the `build` directory.
 
-For building the `virt-launcher` image with the custom binary, it is necessary to add the binary in this way:
+For building the `virt-launcher` image with the custom binary, it is necessary to add the binary in the `WORKSPACE` and in the virt-launcher `BUILD.bazel`:
 ```diff
 --- a/WORKSPACE
 +++ b/WORKSPACE
